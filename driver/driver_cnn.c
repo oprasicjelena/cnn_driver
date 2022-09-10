@@ -63,6 +63,8 @@ ssize_t cnn_read(struct file *pfile, char __user *buffer, size_t length, loff_t 
 static ssize_t cnn_write(struct file *pfile,const  char __user *buffer, size_t length, loff_t *offset);
 int cnn_open(struct inode *pinode, struct file *pfile);
 int cnn_close(struct inode *pinode, struct file *pfile);
+static int cnn_probe(struct platform_device *pdev);
+static int cnn_remove(struct platform_device *pdev);
 
 struct file_operations my_fops = {
 	.owner = THIS_MODULE,
