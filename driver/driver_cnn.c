@@ -99,8 +99,128 @@ int cnn_close(struct inode *pinode, struct file *pfile)
 	return 0;
 }
 
+static int cnn_probe(struct platform_device *pdev) {
+	struct resource *r_mem;
+	int rc = 0;
+
+	// Get phisical register adress space from device tree
+	r_mem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+	if (!r_mem) {
+		printk(KERN_ALERT "cnn_probe: Failed to get reg resource\n");
+		return -ENODEV;
+	}
+
+	switch (device_fsm)	{
+	case 0:
+		// Get memory for structure cnn_info
+		tp = (struct cnn_info *) kmalloc(sizeof(struct cnn_info), GFP_KERNEL);
+		if (!tp) {
+			printk(KERN_ALERT "cnn_probe: Could not allocate CNN device\n");
+			return -ENOMEM;
+		}
+
+		// Put phisical adresses in cnn_info structure
+		tp->mem_start = r_mem->start;
+		tp->mem_end = r_mem->end;
+
+		// Reserve that memory space for this driver
+		if (!request_mem_region(tp->mem_start,tp->mem_end - tp->mem_start + 1,	DEVICE_NAME)) {
+			printk(KERN_ALERT "cnn_probe: Could not lock memory region at %p\n",(void *)tp->mem_start);
+			rc = -EBUSY;
+			goto error1;
+		}
+
+		// Remap phisical to virtual adresses
+		tp->base_addr = ioremap(tp->mem_start, tp->mem_end - tp->mem_start + 1);
+		if (!tp->base_addr) {
+			printk(KERN_ALERT "cnn_probe: Could not allocate memory\n");
+			rc = -EIO;
+			goto error2;
+		}
+		++device_fsm;
+		printk(KERN_NOTICE "cnn_probe: CNN platform driver registered\n");
+		return 0;//ALL OK
+	error2:
+		release_mem_region(tp->mem_start, tp->mem_end - tp->mem_start + 1);
+		kfree(tp);
+	error1:
+		return rc;
+		break;
+	case 1:
+		// Get memory for structure cnn_info
+		bp = (struct cnn_info *) kmalloc(sizeof(struct cnn_info), GFP_KERNEL);
+		if (!bp) {
+			printk(KERN_ALERT "cnn_probe: Could not allocate CNN device\n");
+			return -ENOMEM;
+		}
+
+		// Put phisical adresses in cnn_info structure
+		bp->mem_start = r_mem->start;
+		bp->mem_end = r_mem->end;
+
+		// Reserve that memory space for this driver
+		if (!request_mem_region(bp->mem_start,bp->mem_end - bp->mem_start + 1,	DEVICE_NAME)) {
+			printk(KERN_ALERT "cnn_probe: Could not lock memory region at %p\n",(void *)bp->mem_start);
+			rc = -EBUSY;
+			goto error3;
+		}
+
+		// Remap phisical to virtual adresses
+		bp->base_addr = ioremap(bp->mem_start, bp->mem_end - bp->mem_start + 1);
+		if (!bp->base_addr) {
+			printk(KERN_ALERT "cnn_probe: Could not allocate memory\n");
+			rc = -EIO;
+			goto error4;
+		}
+		++device_fsm;
+		printk(KERN_NOTICE "cnn_probe: CNN platform driver registered\n");
+		return 0;//ALL OK
+	error4:
+		release_mem_region(bp->mem_start, bp->mem_end - bp->mem_start + 1);
+		kfree(bp);
+	error3:
+		return rc;
+		break;
+
+	default:
+		printk(KERN_INFO "cnn_probe: Device FSM in illegal state. \n");
+		return -1;
+		break;
+	}
+}
+
+static int cnn_remove(struct platform_device *pdev) {
+	switch (device_fsm)	{
+	case 0:
+		iounmap(tp->base_addr);
+    	iowrite32(0, tp->base_addr);
+		release_mem_region(tp->mem_start, tp->mem_end - tp->mem_start + 1);
+		kfree(tp);
+		printk(KERN_WARNING "cnn_remove: CNN driver removed\n");
+		return 0;
+		break;
+	case 1:
+		iounmap(bp->base_addr);
+    	iowrite32(0, bp->base_addr);
+		release_mem_region(bp->mem_start, bp->mem_end - bp->mem_start + 1);
+		kfree(bp);
+		printk(KERN_WARNING "cnn_remove: CNN driver removed\n");
+		return 0;
+		break;
+	default:
+    	printk(KERN_INFO "cnn_remove Device FSM in illegal state. \n");
+    	return -1;
+		break;
+	}
+}
+
 ssize_t cnn_read(struct file *pfile, char __user *buffer, size_t length, loff_t *offset) 
 {
+	
+	long int r[10];
+	ready = ioread32(tp->base_addr + XIL_CNN_WEA0_OFFSET);
+
+	printk("reading from bram %ld", r[0]);
 	return 0;
 }
 
@@ -155,14 +275,14 @@ static int __init cnn_init(void) {
 	}
 	printk(KERN_INFO "cnn_init: Class created\n");
 
-	my_device = device_create(my_class, NULL, MKDEV(MAJOR(my_dev_id),0), NULL, "xlnx,cnn");
+	my_device = device_create(my_class, NULL, MKDEV(MAJOR(my_dev_id),0), NULL, "xlnx,cnnn");
 	if (my_device == NULL){
 		printk(KERN_ERR "cnn_init: Failed to create device\n");
 		goto fail_1;
 	}
 	printk(KERN_INFO "cnn_init: Device AXI created\n");
 
-	my_device = device_create(my_class, NULL, MKDEV(MAJOR(my_dev_id),1), NULL, "xlnx,bram");
+	my_device = device_create(my_class, NULL, MKDEV(MAJOR(my_dev_id),1), NULL, "xlnx,bramm");
 	if (my_device == NULL){
 		printk(KERN_ERR "cnn_init: Failed to create device\n");
 		goto fail_2;
