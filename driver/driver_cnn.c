@@ -40,6 +40,7 @@
 
 #define DRIVER_NAME "cnn"
 #define DEVICE_NAME "xilcnn"
+#define BUFF_SIZE 100
 
 MODULE_LICENSE("Dual BSD/GPL");
 
@@ -55,6 +56,8 @@ static struct device *my_device;
 static struct cdev *my_cdev;
 static struct cnn_info *tp = NULL;
 static struct cnn_info *bp = NULL;
+
+int device_fsm = 0;
 
 ssize_t cnn_read(struct file *pfile, char __user *buffer, size_t length, loff_t *offset); 
 static ssize_t cnn_write(struct file *pfile,const  char __user *buffer, size_t length, loff_t *offset);
@@ -218,7 +221,7 @@ ssize_t cnn_read(struct file *pfile, char __user *buffer, size_t length, loff_t 
 {
 	
 	long int r[10];
-	ready = ioread32(tp->base_addr + XIL_CNN_WEA0_OFFSET);
+	r[0] = ioread32(tp->base_addr + XIL_CNN_WEA0_OFFSET);
 
 	printk("reading from bram %ld", r[0]);
 	return 0;
@@ -230,7 +233,7 @@ static ssize_t cnn_write(struct file *pfile,const  char __user *buffer, size_t l
 	int len = 0;
 	int br_c, pos;
 	int val;
-	int minor = MINOR(pfile->f_inode->i_rdev);
+	//int minor = MINOR(pfile->f_inode->i_rdev);
 	
 	len = copy_from_user(buff, buffer, length);
 	if(len) {
