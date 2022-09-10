@@ -20,86 +20,163 @@
 #include <linux/of.h>//of_match_table
 #include <linux/ioport.h>//ioremap
 
+// ------------------------------------------
+// REGISTER CONSTANTS
+// ------------------------------------------
+#define XIL_CNN_START_OFFSET 	0x00
+#define XIL_CNN_WEA0_OFFSET 	0x04
+#define XIL_CNN_WEA1_OFFSET 	0x08
+#define XIL_CNN_READY_OFFSET 	0x0c
+#define XIL_CNN_R_0_OFFSET 		0x10
+#define XIL_CNN_R_1_OFFSET 		0x14
+#define XIL_CNN_R_2_OFFSET 		0x18
+#define XIL_CNN_R_3_OFFSET 		0x1c
+#define XIL_CNN_R_4_OFFSET 		0x20
+#define XIL_CNN_R_5_OFFSET 		0x24
+#define XIL_CNN_R_6_OFFSET 		0x28
+#define XIL_CNN_R_7_OFFSET 		0x2c
+#define XIL_CNN_R_8_OFFSET 		0x30
+#define XIL_CNN_R_9_OFFSET 		0x34
+
+#define DRIVER_NAME "cnn"
+#define DEVICE_NAME "xilcnn"
+
 MODULE_LICENSE("Dual BSD/GPL");
 
-dev_t dev_id;
-struct cdev *my_cdev;
-
-
-ssize_t driver_cnn_read(struct file *pfile, char __user *buffer, size_t length, loff_t *offset); 
-static ssize_t driver_cnn_write(struct file *pfile,const  char __user *buffer, size_t length, loff_t *offset);
-int driver_cnn_open(struct inode *pinode, struct file *pfile);
-int driver_cnn_close(struct inode *pinode, struct file *pfile);
-
-struct file_operations my_fops =
-{
-	.owner = THIS_MODULE,
-	.open = driver_cnn_open,
-	.read = driver_cnn_read,
-	.write = driver_cnn_write,
-	.release = driver_cnn_close,
+struct cnn_info {
+	unsigned long mem_start;
+	unsigned long mem_end;
+	void __iomem *base_addr;
 };
 
-int driver_cnn_open(struct inode *pinode, struct file *pfile) 
+dev_t my_dev_id;
+static struct class *my_class;
+static struct device *my_device;
+static struct cdev *my_cdev;
+static struct cnn_info *tp = NULL;
+static struct cnn_info *bp = NULL;
+
+ssize_t cnn_read(struct file *pfile, char __user *buffer, size_t length, loff_t *offset); 
+static ssize_t cnn_write(struct file *pfile,const  char __user *buffer, size_t length, loff_t *offset);
+int cnn_open(struct inode *pinode, struct file *pfile);
+int cnn_close(struct inode *pinode, struct file *pfile);
+
+struct file_operations my_fops = {
+	.owner = THIS_MODULE,
+	.open = cnn_open,
+	.read = cnn_read,
+	.write = cnn_write,
+	.release = cnn_close,
+};
+
+static struct of_device_id cnn_of_match[] = {
+	{ .compatible = "xlnx,cnn", },
+	{ .compatible = "xlnx,bram", },
+	{ /* end of list */ },
+};
+
+static struct platform_driver cnn_driver = {
+	.driver = {
+		.name = DRIVER_NAME,
+		.owner = THIS_MODULE,
+		.of_match_table	= cnn_of_match,
+	},
+	.probe		= cnn_probe,
+	.remove		= cnn_remove,
+};
+
+MODULE_DEVICE_TABLE(of, cnn_of_match);
+
+int cnn_open(struct inode *pinode, struct file *pfile) 
 {
 	printk(KERN_INFO "Succesfully opened file\n");
 	return 0;
 }
 
-int driver_cnn_close(struct inode *pinode, struct file *pfile) 
+int cnn_close(struct inode *pinode, struct file *pfile) 
 {
 	printk(KERN_INFO "Succesfully closed file\n");
 	return 0;
 }
 
-ssize_t driver_cnn_read(struct file *pfile, char __user *buffer, size_t length, loff_t *offset) 
+ssize_t cnn_read(struct file *pfile, char __user *buffer, size_t length, loff_t *offset) 
 {
 	return 0;
 }
 
-static ssize_t driver_cnn_write(struct file *pfile,const  char __user *buffer, size_t length, loff_t *offset) 
+static ssize_t cnn_write(struct file *pfile,const  char __user *buffer, size_t length, loff_t *offset) 
 {
 	return 0;
 }
 
-static int __init driver_cnn_init(void)
-{
+static int __init cnn_init(void) {
 	int ret = 0;
-	ret = alloc_chrdev_region(&dev_id, 0, 1, "driver_cnn");
-	if(ret)
-	{
-		printk(KERN_ERR "Failed to register char device\n");
-		return ret;
-	}
-	
-	my_cdev = cdev_alloc();
-	my_cdev -> owner = THIS_MODULE;
-	my_cdev -> ops = &my_fops;
-	
-	ret = cdev_add(my_cdev, dev_id, 1);
-	if(ret)
-	{
-		unregister_chrdev_region(dev_id, 1);
-		printk(KERN_ERR "Failed to add char device\n");
-		return ret;
-	}
 
-	printk(KERN_INFO "Hello from cnn driver!\n");
-	return 0;
+	ret = alloc_chrdev_region(&my_dev_id, 0, 1, DRIVER_NAME);
+	if (ret){
+		printk(KERN_ERR "cnn_init: Failed to register char device\n");
+		return ret;
+	}
+	printk(KERN_INFO "cnn_init: Char device region allocated\n");
+
+	my_class = class_create(THIS_MODULE, "cnn_class");
+	if (my_class == NULL){
+		printk(KERN_ERR "cnn_init: Failed to create class\n");
+		goto fail_0;
+	}
+	printk(KERN_INFO "cnn_init: Class created\n");
+
+	my_device = device_create(my_class, NULL, MKDEV(MAJOR(my_dev_id),0), NULL, "xlnx,cnn");
+	if (my_device == NULL){
+		printk(KERN_ERR "cnn_init: Failed to create device\n");
+		goto fail_1;
+	}
+	printk(KERN_INFO "cnn_init: Device AXI created\n");
+
+	my_device = device_create(my_class, NULL, MKDEV(MAJOR(my_dev_id),1), NULL, "xlnx,bram");
+	if (my_device == NULL){
+		printk(KERN_ERR "cnn_init: Failed to create device\n");
+		goto fail_2;
+	}
+	printk(KERN_INFO "cnn_init: Device BRAM created\n");
+
+	my_cdev = cdev_alloc();	
+	my_cdev->ops = &my_fops;
+	my_cdev->owner = THIS_MODULE;
+	ret = cdev_add(my_cdev, my_dev_id, 2);
+	if (ret)
+	{
+		printk(KERN_ERR "cnn_init: Failed to add cdev\n");
+		goto fail_3;
+	}
+	printk(KERN_INFO "cnn_init: Cdev added\n");
+	printk(KERN_NOTICE "cnn_init: Hello world\n");
+
+	return platform_driver_register(&cnn_driver);
+
+fail_3:
+	device_destroy(my_class, MKDEV(MAJOR(my_dev_id),1));
+fail_2:
+	device_destroy(my_class, MKDEV(MAJOR(my_dev_id),0));
+fail_1:
+	class_destroy(my_class);
+fail_0:
+	unregister_chrdev_region(my_dev_id, 1);
+	return -1;
 }
 
-static void __exit diver_cnn_exit(void)
-{
+// ------------------------------------------
+// EXIT
+// ------------------------------------------
+static void __exit cnn_exit(void) {
+	platform_driver_unregister(&cnn_driver);
 	cdev_del(my_cdev);
-	unregister_chrdev_region(dev_id, 1);
-	printk(KERN_INFO"Goodbye from cnn driver\n");
+	device_destroy(my_class, MKDEV(MAJOR(my_dev_id),0));
+	device_destroy(my_class, MKDEV(MAJOR(my_dev_id),1));
+	class_destroy(my_class);
+	unregister_chrdev_region(my_dev_id, 1);
+	printk(KERN_INFO "cnn_exit: Goodbye, cruel world\n");
 }
 
-
-module_init(driver_cnn_init);
-module_exit(diver_cnn_exit);
-
-
-
-
-
+module_init(cnn_init);
+module_exit(cnn_exit);
