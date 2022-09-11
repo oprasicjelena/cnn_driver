@@ -245,7 +245,7 @@ static ssize_t cnn_write(struct file *pfile,const  char __user *buffer, size_t l
 
 	printk(KERN_INFO "cnn_read Succesfully wrote into CNN device 1.\n");
 
-	sscanf(buffer, "%d %d %d", br_c, pos, val);
+	sscanf(buffer, "%d %d %d", &br_c, &pos, &val);
 
 	if(br_c < 32) {
 		iowrite32(1 << br_c, tp->base_addr + XIL_CNN_WEA0_OFFSET);
@@ -280,14 +280,14 @@ static int __init cnn_init(void) {
 	}
 	printk(KERN_INFO "cnn_init: Class created\n");
 
-	my_device = device_create(my_class, NULL, MKDEV(MAJOR(my_dev_id),0), NULL, "xlnx,cnnn");
+	my_device = device_create(my_class, NULL, MKDEV(MAJOR(my_dev_id),0), NULL, "xlnx,cnn");
 	if (my_device == NULL){
 		printk(KERN_ERR "cnn_init: Failed to create device\n");
 		goto fail_1;
 	}
 	printk(KERN_INFO "cnn_init: Device AXI created\n");
 
-	my_device = device_create(my_class, NULL, MKDEV(MAJOR(my_dev_id),1), NULL, "xlnx,bramm");
+	my_device = device_create(my_class, NULL, MKDEV(MAJOR(my_dev_id),1), NULL, "xlnx,bram");
 	if (my_device == NULL){
 		printk(KERN_ERR "cnn_init: Failed to create device\n");
 		goto fail_2;
