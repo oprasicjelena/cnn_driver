@@ -183,9 +183,13 @@ void weight_write(char adr[]) {
 
 
 void write_ip(char adr0[], char adr1[]) {
+   FILE* cnn;
+   cnn = fopen(loc0, "w");
 
-   weight_write(adr0);
    img_write(adr1);
+   weight_write(adr0);
+   
+   fprintf (cnn, "%d %d %d", 42, 0, 0)
 }
 
 float cast(int x){
@@ -202,9 +206,11 @@ void read_ip(float buff[]) {
     FILE* cnn;
     cnn = fopen(loc1, "r");
     int temp;        
-    for(int i = 0; i < OUT_SIZE; i++){
+    int i;
+    for(i = 0; i < OUT_SIZE; i++){
         fscanf (cnn, "%d", &temp);
         buff[i] = cast(temp);
+        printf("%d", buff[i]);
     }
 }
 
@@ -231,37 +237,37 @@ int main(int argc, char* argv[])
     printf("Image showed: \n");//set message
     switch(j){
         case 0:
-           printf("T-shirt/top");
+           printf("T-shirt/top\n");
             break;
         case 1:
-            printf("Trousers");
+            printf("Trousers\n");
             break;
         case 2:
-            printf("Pullover");
+            printf("Pullover\n");
             break;
         case 3:
-            printf("Dress");
+            printf("Dress\n");
             break;
         case 4:
-            printf("Coat");
+            printf("Coat\n");
             break;
         case 5:
-            printf("Sandal");
+            printf("Sandal\n");
             break;
         case 6:
-            printf("Shirt");
+            printf("Shirt\n");
             break;
         case 7:
-            printf("Sneaker");
+            printf("Sneaker\n");
             break;
         case 8:
-            printf("Bag");
+            printf("Bag\n");
             break;
         case 9:
-            printf("Ankle boot");
+            printf("Ankle boot\n");
             break;
         default:
-            printf("NaN");
+            printf("NaN\n");
             break;
     }
     
