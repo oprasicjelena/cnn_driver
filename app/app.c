@@ -24,7 +24,7 @@ void img_write(char adr[]) {
     int i, j;
     int temp, a, b;
     int n[16];
-    cnn = fopen(loc1, "w");
+    cnn = fopen(loc0, "w");
     image = fopen(adr, "r");
 
     for(i = 0; i< 16; i++){
@@ -185,12 +185,11 @@ void weight_write(char adr[]) {
 void write_ip(char adr0[], adr1[]) {
 
    weight_write(adr0);
-   image_write(adr1);
+   img_write(adr1);
 }
 
 
 int main(int argc, char* argv[])
 {
-	write_ip(argv[1]);
-    write_ip(argv[2]);
+	write_ip(argv[1], argv[2]);
 }

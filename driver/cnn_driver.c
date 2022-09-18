@@ -240,7 +240,19 @@ int cnn_close(struct inode *pinode, struct file *pfile) {
 
 
 ssize_t cnn_read(struct file *pfile, char __user *buffer, size_t length, loff_t *offset) {
-	
+	//char buf[BUFF_SIZE];
+  long int r[10]
+
+  ready = ioread32(tp->base_addr + XIL_CNN_READY_OFFSET);
+    if (ready) {
+      printk(KERN_INFO "cnn_write: results ready\n");
+    }
+    else
+    {
+      printk(KERN_INFO "cnn_write: results not ready\n");
+    }
+
+
 	return 0;
 }
 
@@ -250,7 +262,6 @@ ssize_t cnn_write(struct file *pfile, const char __user *buffer, size_t length, 
     int len = 0;
     int br_c, pos;
     int val;
-    int temp;
     int minor = MINOR(pfile->f_inode->i_rdev);
 
     len = copy_from_user(buff, buffer, length);
@@ -262,7 +273,7 @@ ssize_t cnn_write(struct file *pfile, const char __user *buffer, size_t length, 
                 
     switch (minor) {
     case 0:
-          printk(KERN_INFO "cnn_read Succesfully wrote into CNN device 0.\n");
+          printk(KERN_INFO "cnn_read Succesfully wrote into CNN device /dev/xlnx,ip-1.0\n");
           iowrite32(1, tp->base_addr + XIL_CNN_START_OFFSET);
           break;
     case 1:
@@ -291,6 +302,7 @@ ssize_t cnn_write(struct file *pfile, const char __user *buffer, size_t length, 
   default:
           printk(KERN_ERR "cnn_read Invalid minor. \n");
           break;
+  }
 
   return length;
 }
