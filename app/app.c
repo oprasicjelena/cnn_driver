@@ -182,14 +182,88 @@ void weight_write(char adr[]) {
 }
 
 
-void write_ip(char adr0[], adr1[]) {
+void write_ip(char adr0[], char adr1[]) {
 
    weight_write(adr0);
    img_write(adr1);
 }
 
+float cast(int x){
+    if (x < 262144) {
+        return x/2048.0;
+    }
+    else {
+        return (x-524288)/2048.0;
+    }
+    
+}
+
+void read_ip(float buff[]) {
+    FILE* cnn;
+    cnn = fopen(loc1, "r");
+    int temp;        
+    for(int i = 0; i < OUT_SIZE; i++){
+        fscanf (cnn, "%d", &temp);
+        buff[i] = cast(temp);
+    }
+}
 
 int main(int argc, char* argv[])
 {
-	write_ip(argv[1], argv[2]);
+    float result[OUT_SIZE];
+    int i, j;
+
+    write_ip(argv[1], argv[2]);
+
+    read_ip(result);
+
+    double temp = result[0];
+    j = 0;
+    for(i = 1; i < 10; i++){
+        if(temp < result[i]){
+            temp = result[i];
+            j = i;
+        }
+    }
+
+    usleep(2000);
+
+    printf("Image showed: \n");//set message
+    switch(j){
+        case 0:
+           printf("T-shirt/top");
+            break;
+        case 1:
+            printf("Trousers");
+            break;
+        case 2:
+            printf("Pullover");
+            break;
+        case 3:
+            printf("Dress");
+            break;
+        case 4:
+            printf("Coat");
+            break;
+        case 5:
+            printf("Sandal");
+            break;
+        case 6:
+            printf("Shirt");
+            break;
+        case 7:
+            printf("Sneaker");
+            break;
+        case 8:
+            printf("Bag");
+            break;
+        case 9:
+            printf("Ankle boot");
+            break;
+        default:
+            printf("NaN");
+            break;
+    }
+    
+    return 0;
 }
