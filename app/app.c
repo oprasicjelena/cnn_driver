@@ -7,7 +7,7 @@
 #define OUT_SIZE 10
 
 //char loc0[] = "/dev/xlnx,cnn";
-char loc1[] = "/dev/axi-bram-ctrl-4.1";
+char loc1[] = "/dev/xlnx,axi-bram-ctrl-4.1";
 
 int comp2(float x) {
     if (x >= 0) {
@@ -33,12 +33,14 @@ void weight_write(char adr[]) {
     		fscanf(weight, "%f", &t);
 			temp = comp2(t);
     		fprintf(bram, "%d %d %d", 16+j, i, temp);
+            fflush(bram);
     	}
     }
 
     for (i = 0; i < 7; i++){
     	for (j = 0; j < 10; j++){
             fprintf(bram, "%d %d %d", 16+9+j, i, 0);
+            fflush(bram);
     	}
     }
 
@@ -47,6 +49,7 @@ void weight_write(char adr[]) {
     		fscanf(weight, "%f", &t);
 			temp = comp2(t);
             fprintf(bram, "%d %d %d", 16+9+j, i, temp);
+            fflush(bram);
     	}
         i++;
     }

@@ -246,7 +246,42 @@ ssize_t cnn_read(struct file *pfile, char __user *buffer, size_t length, loff_t 
 
 ssize_t cnn_write(struct file *pfile, const char __user *buffer, size_t length, loff_t *offset) {
 
-	return length;
+	 char buff[BUFF_SIZE];
+    int len = 0;
+    int br_c, pos;
+    int val;
+    int temp;
+        
+    len = copy_from_user(buff, buffer, length);
+    if(len) {
+      return -EFAULT;
+    }
+    
+    buff[length]='\0';
+                
+    printk(KERN_INFO "cnn_read Succesfully wrote into CNN device xlnx,axi-bram-ctrl-4.1.\n");
+    printk(KERN_INFO "length is: %d\n", length);
+
+    sscanf(buff, "%d %d %d", &br_c, &pos, &val);
+
+    if(br_c < 32) {
+      iowrite32(1 << br_c, tp->base_addr + XIL_CNN_WEA0_OFFSET);
+    }
+    else {
+      iowrite32(1 << (br_c - 32), tp->base_addr + XIL_CNN_WEA1_OFFSET);
+    }
+    int ret = 0;
+    iowrite32(val, bp->base_addr + 4*pos);
+    ret = ioread32(bp->base_addr + 4*pos);
+
+    printk("ret is %d\n", ret);  
+    iowrite32(0, tp->base_addr + XIL_CNN_WEA0_OFFSET);
+    iowrite32(0, tp->base_addr + XIL_CNN_WEA1_OFFSET);
+
+    printk(KERN_INFO "%d %d %d", br_c, pos, val);
+
+
+  return length;
 }
 
 static int __init cnn_init(void) {
