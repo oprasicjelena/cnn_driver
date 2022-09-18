@@ -266,14 +266,14 @@ static int __init cnn_init(void) {
 	}
 	printk(KERN_INFO "cnn_init: Class created\n");
 
-	my_device = device_create(my_class, NULL, MKDEV(MAJOR(my_dev_id),0), NULL, "xlnx,cnn");
+	my_device = device_create(my_class, NULL, MKDEV(MAJOR(my_dev_id),0), NULL, "xlnx,ip-1.0");
 	if (my_device == NULL){
 		printk(KERN_ERR "cnn_init: Failed to create device\n");
 		goto fail_1;
 	}
 	printk(KERN_INFO "cnn_init: Device AXI created\n");
 
-	my_device = device_create(my_class, NULL, MKDEV(MAJOR(my_dev_id),1), NULL, "xlnx,bram");
+	my_device = device_create(my_class, NULL, MKDEV(MAJOR(my_dev_id),1), NULL, "xlnx,axi-bram-ctrl-4.1");
 	if (my_device == NULL){
 		printk(KERN_ERR "cnn_init: Failed to create device\n");
 		goto fail_2;
