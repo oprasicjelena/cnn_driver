@@ -240,12 +240,21 @@ int cnn_close(struct inode *pinode, struct file *pfile) {
 
 
 ssize_t cnn_read(struct file *pfile, char __user *buffer, size_t length, loff_t *offset) {
-	//char buf[BUFF_SIZE];
-  long int r[10]
+	char buf[BUFF_SIZE];
+  long int r[10];
 
   ready = ioread32(tp->base_addr + XIL_CNN_READY_OFFSET);
     if (ready) {
       printk(KERN_INFO "cnn_write: results ready\n");
+
+      for (int i = 0; i < 10; i++) {
+        r[i] = ioread32(tp->base_addr + XIL_CNN_R_0_OFFSET + 4*i);
+      }
+
+      len = scnprintf(buf, BUFF_SIZE, "%d %d %d %d %d %d %d %d %d %d\n", r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9]);
+
+       if (copy_to_user(buffer, buf, len))
+        return -EFAULT;
     }
     else
     {
