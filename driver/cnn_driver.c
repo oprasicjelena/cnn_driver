@@ -96,8 +96,8 @@ struct file_operations my_fops = {
 };
 
 static struct of_device_id cnn_of_match[] = {
-	{ .compatible = "xlnx,cnn", },
-	{ .compatible = "xlnx,bram", },
+	{ .compatible = "xlnx,ip-1.0", },
+	{ .compatible = "xlnx,axi-bram-ctrl-4.1", },
 	{ /* end of list */ },
 };
 

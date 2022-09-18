@@ -7,7 +7,7 @@
 #define OUT_SIZE 10
 
 //char loc0[] = "/dev/xlnx,cnn";
-char loc1[] = "/dev/xlnx,bram";
+char loc1[] = "/dev/axi-bram-ctrl-4.1";
 
 int comp2(float x) {
     if (x >= 0) {
