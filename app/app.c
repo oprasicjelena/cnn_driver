@@ -112,8 +112,8 @@ void img_write(char adr[]) {
                 }
                 else{
                     if(i != IMG_SIZE - 1 && j != IMG_SIZE - 1){
-                        fflush(cnn);
                         fprintf(cnn, "%d %d %d", 5, n[5], temp);
+                        fflush(cnn);
                         n[5]++;
                     }
 
@@ -197,7 +197,7 @@ void write_ip(char adr0[], char adr1[]) {
    img_write(adr1);
    weight_write(adr0);
    
-   fprintf (cnn, "%d %d %d", 42, 0, 0)
+   fprintf (cnn, "%d %d %d", 42, 0, 0);
 }
 
 float cast(int x){
