@@ -157,14 +157,8 @@ void weight_write(char adr[]) {
 			temp = comp2(t);
     		fprintf(bram, "%d %d %d", 16+j, i, temp);
             
-            k++;
-            
-            if(k == 16)
-            {
-                fflush(bram);
-                k = 0;
-                printf("Packet sent\n");
-            }
+            fflush(bram);
+            printf("Packet sent\n");
     	}
     }
 
