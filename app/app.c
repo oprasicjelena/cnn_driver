@@ -144,7 +144,7 @@ void img_write(char adr[]) {
 void weight_write(char adr[]) {
 	FILE *bram;
     FILE *weight;
-    int i, j;
+    int i, j, k;
     int temp, a, b;
     float t;
     int n[16];
@@ -156,7 +156,15 @@ void weight_write(char adr[]) {
     		fscanf(weight, "%f", &t);
 			temp = comp2(t);
     		fprintf(bram, "%d %d %d", 16+j, i, temp);
-            fflush(bram);
+            
+            k++;
+            
+            if(k == 16)
+            {
+                fflush(bram);
+                k = 0;
+                printf("Packet sent\n");
+            }
     	}
     }
 
