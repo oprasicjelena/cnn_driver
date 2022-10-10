@@ -274,8 +274,8 @@ ssize_t cnn_write(struct file *pfile, const char __user *buffer, size_t length, 
 
 	 char buff[BUFF_SIZE];
     int len = 0;
-    int br_c[4], pos[4];
-    int val[4];
+    int br_c, pos;
+    int val;
     int minor = MINOR(pfile->f_inode->i_rdev);
 
     len = copy_from_user(buff, buffer, length);
