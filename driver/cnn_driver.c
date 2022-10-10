@@ -274,8 +274,8 @@ ssize_t cnn_write(struct file *pfile, const char __user *buffer, size_t length, 
 
 	 char buff[BUFF_SIZE];
     int len = 0;
-    int br_c, pos;
-    int val;
+    int br_c[4], pos[4];
+    int val[4];
     int minor = MINOR(pfile->f_inode->i_rdev);
 
     len = copy_from_user(buff, buffer, length);
@@ -309,7 +309,7 @@ ssize_t cnn_write(struct file *pfile, const char __user *buffer, size_t length, 
           printk("ret is %d\n", ret);  
           iowrite32(0, tp->base_addr + XIL_CNN_WEA0_OFFSET);
           iowrite32(0, tp->base_addr + XIL_CNN_WEA1_OFFSET);
-
+          
           printk(KERN_INFO "%d %d %d", br_c, pos, val);
           break;
 

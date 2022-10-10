@@ -156,13 +156,11 @@ void weight_write(char adr[]) {
     		fscanf(weight, "%f", &t);
 			temp = comp2(t);
     		fprintf(bram, "%d %d %d", 16+j, i, temp);
-            
-            fflush(bram);
             printf("Packet sent\n");
     	}
     }
 
-   /* for (i = 0; i < 7; i++){
+   for (i = 0; i < 7; i++){
     	for (j = 0; j < 10; j++){
             fprintf(bram, "%d %d %d", 16+9+j, i, 0);
             fflush(bram);
@@ -177,7 +175,7 @@ void weight_write(char adr[]) {
             fflush(bram);
     	}
         i++;
-    }*/
+    }
     
     fclose(bram);
     fclose(weight);
