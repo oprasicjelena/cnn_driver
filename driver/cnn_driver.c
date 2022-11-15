@@ -289,6 +289,7 @@ ssize_t cnn_write(struct file *pfile, const char __user *buffer, size_t length, 
     case 0:
           printk(KERN_INFO "cnn_read Succesfully wrote into CNN device /dev/xlnx,ip-1.0\n");
           iowrite32(1, tp->base_addr + XIL_CNN_START_OFFSET);
+          
           break;
     case 1:
           printk(KERN_INFO "cnn_read Succesfully wrote into CNN device xlnx,axi-bram-ctrl-4.1.\n");

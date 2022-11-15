@@ -24,7 +24,7 @@ void img_write(char adr[]) {
     int i, j;
     int temp, a, b;
     int n[16];
-    cnn = fopen(loc0, "w");
+    cnn = fopen(loc1, "w");
     image = fopen(adr, "r");
 
     for(i = 0; i< 16; i++){
@@ -156,7 +156,6 @@ void weight_write(char adr[]) {
     		fscanf(weight, "%f", &t);
 			temp = comp2(t);
     		fprintf(bram, "%d %d %d", 16+j, i, temp);
-            printf("Packet sent\n");
     	}
     }
 
@@ -189,7 +188,9 @@ void write_ip(char adr0[], char adr1[]) {
    img_write(adr1);
    weight_write(adr0);
    
-   fprintf (cnn, "%d %d %d", 42, 0, 0);
+   fprintf (cnn, "%d %d %d", 42, 0, 1);
+   fflush(cnn);
+   fclose(cnn);
 }
 
 float cast(int x){
@@ -221,6 +222,8 @@ int main(int argc, char* argv[])
 
     write_ip(argv[1], argv[2]);
 
+    usleep(2000);
+
     read_ip(result);
 
     double temp = result[0];
@@ -232,7 +235,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    usleep(2000);
+    
 
     printf("Image showed: \n");//set message
     switch(j){
