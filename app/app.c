@@ -185,10 +185,16 @@ void write_ip(char adr0[], char adr1[]) {
    FILE* cnn;
    cnn = fopen(loc0, "w");
 
+   //set start register
+   fprintf (cnn, "%d %d %d", 42, 0, 1);
+
+   //write image to bram
    img_write(adr1);
+
+   //write weights to bram
    weight_write(adr0);
    
-   fprintf (cnn, "%d %d %d", 42, 0, 1);
+   
    fflush(cnn);
    fclose(cnn);
 }

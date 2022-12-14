@@ -308,8 +308,8 @@ ssize_t cnn_write(struct file *pfile, const char __user *buffer, size_t length, 
           ret = ioread32(bp->base_addr + 4*pos);
 
           printk("ret is %d\n", ret);  
-          iowrite32(0, tp->base_addr + XIL_CNN_WEA0_OFFSET);
-          iowrite32(0, tp->base_addr + XIL_CNN_WEA1_OFFSET);
+          //iowrite32(0, tp->base_addr + XIL_CNN_WEA0_OFFSET);
+          //iowrite32(0, tp->base_addr + XIL_CNN_WEA1_OFFSET);
           
           printk(KERN_INFO "%d %d %d", br_c, pos, val);
           break;
