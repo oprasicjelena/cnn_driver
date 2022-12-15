@@ -246,6 +246,7 @@ ssize_t cnn_read(struct file *pfile, char __user *buffer, size_t length, loff_t 
   int len;
 
   ready = ioread32(tp->base_addr + XIL_CNN_READY_OFFSET);
+  
   if (ready) 
   {
     printk(KERN_INFO "cnn_write: results ready\n");
@@ -257,9 +258,7 @@ ssize_t cnn_read(struct file *pfile, char __user *buffer, size_t length, loff_t 
 
     len = scnprintf(buf, BUFF_SIZE, "%ld %ld %ld %ld %ld %ld %ld %ld %ld %ld\n", r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9]);
 
-    printk("%ld %ld %ld %ld %ld %ld %ld %ld %ld %ld\n", r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9]);
-
-     if (copy_to_user(buffer, buf, len))
+    if (copy_to_user(buffer, buf, len))
       return -EFAULT;
     }
     else
@@ -287,6 +286,7 @@ ssize_t cnn_write(struct file *pfile, const char __user *buffer, size_t length, 
                 
     switch (minor) {
     case 0:
+          //set start reg to allow operations
           printk(KERN_INFO "cnn_read Succesfully wrote into CNN device /dev/xlnx,ip-1.0\n");
           iowrite32(1, tp->base_addr + XIL_CNN_START_OFFSET);
           
@@ -303,15 +303,12 @@ ssize_t cnn_write(struct file *pfile, const char __user *buffer, size_t length, 
           else {
             iowrite32(1 << (br_c - 32), tp->base_addr + XIL_CNN_WEA1_OFFSET);
           }
-          int ret = 0;
-          iowrite32(val, bp->base_addr + 4*pos);
-          ret = ioread32(bp->base_addr + 4*pos);
 
-          printk("ret is %d\n", ret);  
-          //iowrite32(0, tp->base_addr + XIL_CNN_WEA0_OFFSET);
-          //iowrite32(0, tp->base_addr + XIL_CNN_WEA1_OFFSET);
+          iowrite32(val, bp->base_addr + 4*pos);
+
+          iowrite32(0, tp->base_addr + XIL_CNN_WEA0_OFFSET);
+          iowrite32(0, tp->base_addr + XIL_CNN_WEA1_OFFSET);
           
-          printk(KERN_INFO "%d %d %d", br_c, pos, val);
           break;
 
   default:

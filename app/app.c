@@ -185,14 +185,14 @@ void write_ip(char adr0[], char adr1[]) {
    FILE* cnn;
    cnn = fopen(loc0, "w");
 
-   //set start register
-   fprintf (cnn, "%d %d %d", 42, 0, 1);
-
    //write image to bram
    img_write(adr1);
 
    //write weights to bram
    weight_write(adr0);
+
+   //set start register
+   fprintf (cnn, "%d %d %d", 42, 0, 1);
    
    
    fflush(cnn);
@@ -217,7 +217,6 @@ void read_ip(float buff[]) {
     for(i = 0; i < OUT_SIZE; i++){
         fscanf (cnn, "%d", &temp);
         buff[i] = cast(temp);
-        printf("%d", buff[i]);
     }
 }
 
@@ -240,8 +239,6 @@ int main(int argc, char* argv[])
             j = i;
         }
     }
-
-    
 
     printf("Image showed: \n");//set message
     switch(j){
