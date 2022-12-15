@@ -249,7 +249,6 @@ ssize_t cnn_read(struct file *pfile, char __user *buffer, size_t length, loff_t 
   
   if (ready) 
   {
-    printk(KERN_INFO "cnn_write: results ready\n");
 
     for (i = 0; i < 10; i++)
     {
@@ -292,8 +291,7 @@ ssize_t cnn_write(struct file *pfile, const char __user *buffer, size_t length, 
           
           break;
     case 1:
-          printk(KERN_INFO "cnn_read Succesfully wrote into CNN device xlnx,axi-bram-ctrl-4.1.\n");
-          printk(KERN_INFO "length is: %d\n", length);
+          printk(KERN_INFO "cnn_read Succesfully wrote into CNN device /dev/xlnx,axi-bram-ctrl-4.1.\n");
 
           sscanf(buff, "%d %d %d", &br_c, &pos, &val);
 
